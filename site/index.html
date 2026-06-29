@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Interactive adoption and value projection dashboard for principal-held agent rollout scenarios." />
+  <title>Agent Adoption Projections</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav" aria-label="Page sections">
+      <a href="#controls">Controls</a>
+      <a href="#projection">Projection</a>
+      <a href="#compare">Compare</a>
+      <a href="#model">Model</a>
+    </nav>
+    <div class="hero__grid">
+      <section class="hero__copy">
+        <p class="eyebrow">Dreamcatcher · virality × value receipts</p>
+        <h1>Agent Adoption Projections</h1>
+        <p class="hero__lede">Play with the adoption model: tune virality, resistance, change authority, churn, and value receipts, then watch how active agents and cumulative value move over time.</p>
+        <div class="hero__actions">
+          <a class="button button--primary" href="#controls">Tune the model</a>
+          <a class="button button--ghost" href="#model">See equations</a>
+        </div>
+      </section>
+      <aside class="hero__panel" aria-label="Model summary">
+        <div class="signal-card">
+          <span class="signal-card__label">Core read</span>
+          <strong id="heroVerdict">—</strong>
+          <small id="heroScenario">Select a scenario to start.</small>
+        </div>
+        <div class="mini-metrics" aria-label="Headline metrics">
+          <div><span id="heroActive">—</span><small>active agents</small></div>
+          <div><span id="heroValue">—</span><small>cumulative value</small></div>
+          <div><span id="heroK">—</span><small>effective K/week</small></div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main>
+    <section class="shell section-intro" id="controls">
+      <div>
+        <p class="eyebrow">Projection controls</p>
+        <h2>Choose a baseline, then bend the assumptions.</h2>
+        <p>The presets mirror the original note’s toy model. Sliders update the projection immediately; use reset to return to the selected baseline.</p>
+      </div>
+      <div class="preset-row" role="group" aria-label="Scenario presets">
+        <label for="scenarioSelect">Scenario</label>
+        <select id="scenarioSelect"></select>
+        <button id="resetButton" class="button button--small" type="button">Reset baseline</button>
+      </div>
+    </section>
+
+    <section class="shell workbench" aria-label="Interactive projection workbench">
+      <form id="controlForm" class="controls" aria-label="Projection controls"></form>
+
+      <section class="projection-card" id="projection" aria-live="polite">
+        <div class="projection-card__header">
+          <div>
+            <p class="eyebrow">Projection</p>
+            <h2 id="projectionTitle">—</h2>
+            <p id="projectionDescription" class="muted">—</p>
+          </div>
+          <div class="verdict-pill" id="verdictPill">—</div>
+        </div>
+
+        <div class="metrics-grid" aria-label="Projection metrics">
+          <article><span id="metricActive">—</span><small>Active agents at final week</small></article>
+          <article><span id="metricValue">—</span><small>Cumulative value</small></article>
+          <article><span id="metricWeekValue">—</span><small>Final week value receipt</small></article>
+          <article><span id="metricChurn">—</span><small>Final weekly churn</small></article>
+        </div>
+
+        <div class="chart-tabs" role="group" aria-label="Chart series">
+          <button class="chart-tab is-active" type="button" data-series="active">Active agents</button>
+          <button class="chart-tab" type="button" data-series="cumulativeValue">Cumulative value</button>
+          <button class="chart-tab" type="button" data-series="weeklyValue">Weekly value</button>
+        </div>
+        <canvas id="projectionChart" width="980" height="420" aria-label="Projection line chart"></canvas>
+        <div class="chart-caption" id="chartCaption">—</div>
+      </section>
+    </section>
+
+    <section class="shell compare" id="compare">
+      <div class="compare__header">
+        <div>
+          <p class="eyebrow">Scenario comparison</p>
+          <h2>Baseline adoption physics</h2>
+          <p>Compare baseline presets under their own assumptions. The point is to see which adoption paths need support before they can become loops.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Active agents</th>
+              <th>Effective K</th>
+              <th>Churn</th>
+              <th>Cumulative value</th>
+              <th>Read</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="shell model" id="model">
+      <div>
+        <p class="eyebrow">Model</p>
+        <h2>Simple enough to argue with.</h2>
+        <p>The dashboard deliberately uses a transparent toy model. It is a workbench for questions, not a forecast.</p>
+      </div>
+      <pre><code>effective_k = referrals × invite_conversion × trust_score × change_authority
+network_bonus = min(network_bonus_cap, network_bonus_per_100_agents × active / 100)
+weekly_value_per_agent = base_weekly_value_per_agent + network_bonus
+value_churn_relief = min(0.08, 0.02 × weekly_value_per_agent / value_threshold)
+weekly_churn = max(min_churn, base_churn - value_churn_relief)
+active_next = active × (1 - weekly_churn) + active × effective_k
+weekly_value = active_next × weekly_value_per_agent</code></pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for playing with Dreamcatcher adoption/value assumptions. No data leaves the browser.</p>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
