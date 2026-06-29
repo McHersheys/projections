@@ -19,7 +19,7 @@
       <section class="hero__copy">
         <p class="eyebrow">Dreamcatcher · virality × value receipts</p>
         <h1>Agent Adoption Projections</h1>
-        <p class="hero__lede">Play with the adoption model: tune virality, resistance, change authority, churn, and value receipts, then watch how active agents and cumulative value move over time.</p>
+        <p class="hero__lede">Play with a Bass-style adoption model: tune market ceiling, discovery, virality, resistance, change authority, churn, and value receipts, then watch the adoption curve bend.</p>
         <div class="hero__actions">
           <a class="button button--primary" href="#controls">Tune the model</a>
           <a class="button button--ghost" href="#model">See equations</a>
@@ -34,7 +34,7 @@
         <div class="mini-metrics" aria-label="Headline metrics">
           <div><span id="heroActive">—</span><small>active agents</small></div>
           <div><span id="heroValue">—</span><small>cumulative value</small></div>
-          <div><span id="heroK">—</span><small>effective K/week</small></div>
+          <div><span id="heroK">—</span><small>final net/week</small></div>
         </div>
       </aside>
     </div>
@@ -45,7 +45,7 @@
       <div>
         <p class="eyebrow">Projection controls</p>
         <h2>Choose a baseline, then bend the assumptions.</h2>
-        <p>The presets mirror the original note’s toy model. Sliders update the projection immediately; use reset to return to the selected baseline.</p>
+        <p>Version 2 uses a diffusion curve rather than a flat breakeven multiplier: early discovery, referral pressure, social proof, finite market ceiling, churn, and value receipts all interact. Sliders update immediately.</p>
       </div>
       <div class="preset-row" role="group" aria-label="Scenario presets">
         <label for="scenarioSelect">Scenario</label>
@@ -71,7 +71,7 @@
           <article><span id="metricActive">—</span><small>Active agents at final week</small></article>
           <article><span id="metricValue">—</span><small>Cumulative value</small></article>
           <article><span id="metricWeekValue">—</span><small>Final week value receipt</small></article>
-          <article><span id="metricChurn">—</span><small>Final weekly churn</small></article>
+          <article><span id="metricChurn">—</span><small>Final net growth / week</small></article>
         </div>
 
         <div class="chart-tabs" role="group" aria-label="Chart series">
@@ -79,7 +79,9 @@
           <button class="chart-tab" type="button" data-series="cumulativeValue">Cumulative value</button>
           <button class="chart-tab" type="button" data-series="weeklyValue">Weekly value</button>
         </div>
-        <canvas id="projectionChart" width="980" height="420" aria-label="Projection line chart"></canvas>
+        <div class="chart-shell">
+          <canvas id="projectionChart" aria-label="Projection line chart"></canvas>
+        </div>
         <div class="chart-caption" id="chartCaption">—</div>
       </section>
     </section>
@@ -97,9 +99,10 @@
           <thead>
             <tr>
               <th>Scenario</th>
+              <th>Curve</th>
               <th>Active agents</th>
-              <th>Effective K</th>
-              <th>Churn</th>
+              <th>First net/wk</th>
+              <th>Final net/wk</th>
               <th>Cumulative value</th>
               <th>Read</th>
             </tr>
@@ -113,15 +116,15 @@
       <div>
         <p class="eyebrow">Model</p>
         <h2>Simple enough to argue with.</h2>
-        <p>The dashboard deliberately uses a transparent toy model. It is a workbench for questions, not a forecast.</p>
+        <p>The dashboard deliberately uses a transparent diffusion model. It is a workbench for questions, not a forecast.</p>
       </div>
-      <pre><code>effective_k = referrals × invite_conversion × trust_score × change_authority
-network_bonus = min(network_bonus_cap, network_bonus_per_100_agents × active / 100)
-weekly_value_per_agent = base_weekly_value_per_agent + network_bonus
-value_churn_relief = min(0.08, 0.02 × weekly_value_per_agent / value_threshold)
+      <pre><code>market_share = active / addressable_market
+referral_pressure = referrals × market_share × (1 + network_amplification × market_share)
+adoption_pressure = (organic_discovery + referral_pressure) × conversion × trust × change_authority
+new_agents = (addressable_market - active) × adoption_pressure
+weekly_value_per_agent = base_value + min(network_bonus_cap, network_bonus_per_100_agents × active / 100)
 weekly_churn = max(min_churn, base_churn - value_churn_relief)
-active_next = active × (1 - weekly_churn) + active × effective_k
-weekly_value = active_next × weekly_value_per_agent</code></pre>
+active_next = active + new_agents - active × weekly_churn</code></pre>
     </section>
   </main>
 
@@ -129,6 +132,8 @@ weekly_value = active_next × weekly_value_per_agent</code></pre>
     <p>Built for playing with Dreamcatcher adoption/value assumptions. No data leaves the browser.</p>
   </footer>
 
+  <script src="./vendor/chart.umd.min.js" defer></script>
+  <script src="./model.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

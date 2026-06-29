@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +12,10 @@ SITE = ROOT / "site"
 required_files = [
     SITE / "index.html",
     SITE / "styles.css",
+    SITE / "model.js",
     SITE / "app.js",
+    SITE / "vendor/chart.umd.min.js",
+    ROOT / "scripts/model_smoke.js",
     ROOT / ".github/workflows/pages.yml",
 ]
 
@@ -22,6 +26,7 @@ for path in required_files:
 index = (SITE / "index.html").read_text()
 styles = (SITE / "styles.css").read_text()
 app = (SITE / "app.js").read_text()
+model = (SITE / "model.js").read_text()
 workflow = (ROOT / ".github/workflows/pages.yml").read_text()
 
 required_index = [
@@ -30,6 +35,8 @@ required_index = [
     "Active agents",
     "Cumulative value",
     "Scenario comparison",
+    "vendor/chart.umd.min.js",
+    "model.js",
     "site/app.js".replace("site/", ""),
 ]
 for needle in required_index:
@@ -43,19 +50,32 @@ required_scenarios = [
     "top_down_corporate_rollout",
 ]
 for scenario in required_scenarios:
-    if scenario not in app:
-        raise SystemExit(f"app.js missing scenario: {scenario}")
+    if scenario not in model:
+        raise SystemExit(f"model.js missing scenario: {scenario}")
 
 required_functions = [
     "function projectScenario",
     "function drawLineChart",
     "function updateProjection",
-    "effectiveK",
+    "addressable_market",
+    "network_amplification",
     "change_authority",
 ]
 for needle in required_functions:
-    if needle not in app:
-        raise SystemExit(f"app.js missing required model/control code: {needle}")
+    if needle not in app and needle not in model:
+        raise SystemExit(f"missing required model/control code: {needle}")
+
+smoke = subprocess.run(
+    ["node", "scripts/model_smoke.js"],
+    cwd=ROOT,
+    text=True,
+    capture_output=True,
+    check=False,
+)
+if smoke.returncode != 0:
+    sys.stderr.write(smoke.stdout)
+    sys.stderr.write(smoke.stderr)
+    raise SystemExit("model smoke test failed")
 
 if "upload-pages-artifact" not in workflow or "deploy-pages" not in workflow:
     raise SystemExit("Pages workflow missing deploy actions")

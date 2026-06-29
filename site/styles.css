@@ -234,7 +234,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 }
 .muted { color: var(--muted); line-height: 1.6; }
 .verdict-pill {
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 100%;
+  line-height: 1.25;
   border-radius: 999px;
   border: 1px solid var(--line-strong);
   padding: 10px 13px;
@@ -270,19 +272,27 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   font-weight: 740;
 }
 .chart-tab.is-active { color: #06111f; background: var(--accent); border-color: transparent; }
-canvas {
+.chart-shell {
   width: 100%;
-  height: auto;
+  height: 430px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(2, 7, 14, 0.35);
+  padding: 14px;
+}
+.chart-shell canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
   display: block;
 }
 .chart-caption { color: var(--muted); font-size: 0.92rem; line-height: 1.5; margin-top: 10px; }
 
 .compare, .model { margin-top: 28px; padding: 24px; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; }
-table { width: 100%; border-collapse: collapse; min-width: 780px; }
+table { width: 100%; border-collapse: collapse; min-width: 940px; }
 th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
 td { color: var(--text); font-variant-numeric: tabular-nums; }
@@ -315,6 +325,7 @@ pre {
   .projection-card__header { flex-direction: column; }
   .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .model { grid-template-columns: 1fr; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
 
 @media (max-width: 760px) {
@@ -339,6 +350,8 @@ pre {
   .metrics-grid { grid-template-columns: 1fr; }
   .chart-tabs { display: grid; grid-template-columns: 1fr; }
   .chart-tab { width: 100%; }
+  .chart-shell { height: 320px; padding: 10px; }
+  .verdict-pill { width: 100%; border-radius: 18px; }
   .table-wrap { overflow: visible; border: 0; }
   table, thead, tbody, tr, th, td { display: block; min-width: 0; }
   thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
