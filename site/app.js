@@ -72,12 +72,32 @@ function setupScenarioSelect() {
 }
 
 function controlValueLabel(key, value) {
-  if (["invite_conversion", "trust_score", "change_authority", "base_churn", "min_churn", "organic_discovery_rate"].includes(key)) {
+  const percentKeys = [
+    "invite_conversion",
+    "trust_score",
+    "change_authority",
+    "base_churn",
+    "min_churn",
+    "organic_discovery_rate",
+    "easy_savings_capture_rate",
+    "human_availability",
+    "project_realization_rate",
+    "shadow_value_confidence"
+  ];
+  const moneyKeys = [
+    "easy_savings_stock_per_agent",
+    "admin_burden_value_per_agent",
+    "hard_work_value_per_agent",
+    "market_work_value_per_agent",
+    "life_project_stock_per_agent",
+    "value_threshold_for_retention"
+  ];
+  if (percentKeys.includes(key)) {
     return pct(value);
   }
   if (key === "referrals_per_active_per_week") return Number(value).toFixed(3);
   if (key === "network_amplification") return `${Number(value).toFixed(2)}×`;
-  if (["base_weekly_value_per_agent", "network_bonus_per_100_agents", "network_bonus_cap", "value_threshold_for_retention"].includes(key)) {
+  if (moneyKeys.includes(key)) {
     return fmtMoney(value);
   }
   return fmtNumber(value, Number.isInteger(Number(value)) ? 0 : 1);
@@ -166,6 +186,41 @@ function renderMetrics(result) {
   $("heroK").textContent = signedPct(result.finalNetGrowthRate);
 }
 
+function renderValueStack(result) {
+  const last = result.last;
+  const usefulWorkValue = last.cumulativeHardWorkValue + last.cumulativeMarketWorkValue;
+  const cards = [
+    {
+      value: fmtMoney(last.cumulativeEasySavingsValue),
+      label: "finite audit savings",
+      detail: `${fmtMoney(last.easySavingsStockRemaining)} easy stock remains`
+    },
+    {
+      value: fmtMoney(last.cumulativeAdminValue),
+      label: "admin burden removed",
+      detail: `${fmtMoney(last.adminValue)} in final week`
+    },
+    {
+      value: fmtMoney(usefulWorkValue),
+      label: "matched work and harder wins",
+      detail: `${fmtMoney(last.hardWorkValue + last.marketWorkValue)} in final week`
+    },
+    {
+      value: fmtMoney(last.cumulativeLifeProjectValue),
+      label: "health, projects, life goals",
+      detail: `${fmtMoney(last.weeklyShadowValue)} confidence-weighted final week`
+    }
+  ];
+
+  $("valueStack").innerHTML = cards.map((card) => `
+    <article>
+      <span>${card.value}</span>
+      <small>${card.label}</small>
+      <em>${card.detail}</em>
+    </article>
+  `).join("");
+}
+
 function seriesConfig(series) {
   const configs = {
     active: {
@@ -229,11 +284,13 @@ function drawLineChart(canvas, points, series) {
     projectionChart.data.datasets[0].data = data;
     projectionChart.data.datasets[0].borderColor = config.color;
     projectionChart.data.datasets[0].backgroundColor = config.fill;
+    projectionChart.data.datasets[0].pointBorderColor = config.color;
     projectionChart.options.scales.y.min = bounds.min;
     projectionChart.options.scales.y.max = bounds.max;
     projectionChart.options.scales.x.max = points.length;
     projectionChart.options.scales.y.ticks.callback = (value) => fmtAxis(value, series);
     projectionChart.options.scales.y.title.text = config.yTitle;
+    projectionChart.options.plugins.tooltip.callbacks.label = (context) => `${config.label}: ${series.includes("Value") ? fmtMoney(context.parsed.y) : fmtNumber(context.parsed.y, 1)}`;
     projectionChart.update();
     return;
   }
@@ -326,6 +383,7 @@ function updateChartCaption(result) {
 function updateProjection() {
   const result = projectScenario(state.values);
   renderMetrics(result);
+  renderValueStack(result);
   drawLineChart($("projectionChart"), result.points, state.series);
   updateChartCaption(result);
   renderComparison();

@@ -83,6 +83,7 @@
           <canvas id="projectionChart" aria-label="Projection line chart"></canvas>
         </div>
         <div class="chart-caption" id="chartCaption">—</div>
+        <div class="value-stack" id="valueStack" aria-label="Value stack receipts"></div>
       </section>
     </section>
 
@@ -122,8 +123,14 @@
 referral_pressure = referrals × market_share × (1 + network_amplification × market_share)
 adoption_pressure = (organic_discovery + referral_pressure) × conversion × trust × change_authority
 new_agents = (addressable_market - active) × adoption_pressure
-weekly_value_per_agent = base_value + min(network_bonus_cap, network_bonus_per_100_agents × active / 100)
-weekly_churn = max(min_churn, base_churn - value_churn_relief)
+
+easy_savings_receipt = easy_savings_stock × easy_savings_capture_rate
+network_maturity = clamp(market_share × (1 + network_amplification), 0, 1)
+hard_work_receipt = active × hard_work_value × change_authority × ramp(week)
+market_work_receipt = active × market_work_value × human_availability × trust × (0.25 + 0.75 × network_maturity)
+life_project_receipt = life_project_stock × project_realization_rate × change_authority × shadow_value_confidence
+weekly_value = cash_receipts + confidence_weighted_life_project_receipts
+weekly_churn = max(min_churn, base_churn - value_churn_relief(weekly_value / active))
 active_next = active + new_agents - active × weekly_churn</code></pre>
     </section>
   </main>

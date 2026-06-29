@@ -34,6 +34,7 @@ required_index = [
     "Projection controls",
     "Active agents",
     "Cumulative value",
+    "Value stack receipts",
     "Scenario comparison",
     "vendor/chart.umd.min.js",
     "model.js",
@@ -60,6 +61,9 @@ required_functions = [
     "addressable_market",
     "network_amplification",
     "change_authority",
+    "easy_savings_stock_per_agent",
+    "life_project_stock_per_agent",
+    "shadow_value_confidence",
 ]
 for needle in required_functions:
     if needle not in app and needle not in model:
